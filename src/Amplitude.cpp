@@ -24,7 +24,7 @@ void Amplitude::playSound() {
 
 // Updates the amplitude data based on the current point in the audio that you are hearing and inserts into audioData vector
 void Amplitude::update() {
-    if (!sound || sound->getStatus() != sf::Sound::Playing) {
+    if (!sound || sound->getStatus() != Sound::Playing) {
         return;
     }
     // Gets the elapsed time in seconds since the beginning of the sound

@@ -45,9 +45,9 @@ void CircleAmplitude::update() {
     }
     float averageAmplitude = sumAmplitude / amplitudeData.size();
     // Determines how much of an influence the amplitude has on scaling the circle
-    float sensitivity = .005f;
+    float scaleCircle = .005f;
     // Radius of circle is scaled based off how sensitive you want it to be (lower value = less responsive, higher value = more responsive)
-    float radius = minRadius + sensitivity * averageAmplitude;
+    float radius = minRadius + scaleCircle * averageAmplitude;
     radius = max(minRadius, min(radius, maxRadius));
     dancingCircle.setRadius(radius);
     dancingCircle.setOrigin(radius, radius);
