@@ -1,5 +1,5 @@
-#ifndef TESTSFML2_HOME_H
-#define TESTSFML2_HOME_H
+#ifndef HOME_H
+#define HOME_H
 #include "CircleAmplitude.h"
 #include "LineAmplitude.h"
 #include <iostream>
@@ -47,4 +47,4 @@ private:
 };
 
 
-#endif //TESTSFML2_HOME_H
+#endif //HOME_H

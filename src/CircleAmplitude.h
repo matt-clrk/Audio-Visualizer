@@ -1,5 +1,5 @@
-#ifndef TESTSFML2_CIRCLEAMPLITUDE_H
-#define TESTSFML2_CIRCLEAMPLITUDE_H
+#ifndef CIRCLEAMPLITUDE_H
+#define CIRCLEAMPLITUDE_H
 #include "Amplitude.h"
 
 class CircleAmplitude {
@@ -32,4 +32,4 @@ private:
 };
 
 
-#endif //TESTSFML2_CIRCLEAMPLITUDE_H
+#endif //CIRCLEAMPLITUDE_H

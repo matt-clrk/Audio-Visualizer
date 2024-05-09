@@ -37,7 +37,7 @@ void CircleAmplitude::run(const string& audioFile) {
 
 void CircleAmplitude::update() {
     amplitude.update();
-    const std::vector<float>& amplitudeData = amplitude.getAmplitudeData();
+    const vector<float>& amplitudeData = amplitude.getAmplitudeData();
     // Used to calculate the average amplitude
     float sumAmplitude = 0.0f;
     for (float value : amplitudeData) {

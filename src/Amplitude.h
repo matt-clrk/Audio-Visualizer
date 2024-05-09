@@ -1,5 +1,5 @@
-#ifndef TESTSFML2_AMPLITUDE_H
-#define TESTSFML2_AMPLITUDE_H
+#ifndef AMPLITUDE_H
+#define AMPLITUDE_H
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <string>
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif //TESTSFML2_AMPLITUDE_H
+#endif //AMPLITUDE_H

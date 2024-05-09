@@ -1,5 +1,5 @@
-#ifndef TESTSFML2_LINEAMPLITUDE_H
-#define TESTSFML2_LINEAMPLITUDE_H
+#ifndef LINEAMPLITUDE_H
+#define LINEAMPLITUDE_H
 #include "Amplitude.h"
 
 
@@ -28,4 +28,4 @@ private:
 };
 
 
-#endif //TESTSFML2_LINEAMPLITUDE_H
+#endif //LINEAMPLITUDE_H
