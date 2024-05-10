@@ -1,7 +1,6 @@
-# Final-Project-mclark41
+# Audio Visualizer Using SFML
 ## Contributer
 Matthew Clark
-CS2300 University of Vermont
 ## Summary of my program
 The program I designed for the final project is an audio visualizer for the amplitude, or how loud, the song is. The project has two different modes for visualization. A waveform visualization and a "dancing circle" visualization. I intended to have other visuals involved but could not figure out how to properely use GSL's FFT library. The only data you can extrude from the .wav files is the amplitude. However despite this the program still offers some very interesting visuals. Most of the concepts used in this program came from Module 4 or the graphics module. However instead of using the graphics libraries from Module 4, I opted to use SFML. SFML stands for Simple and Fast Multimedia Library. Although SFML wraps over OpenGL it still offers more opportunities for expansion without the need for external libraries, for example the audio library. SFML offers an audio library that allows for the decoding of audio files to be used for projects like mine. By using SFML, it allowed me to focus more on the visuals. Other modules incorporated were Module 2 and Module 1.
 ## User Input in Different Screens
@@ -33,5 +32,3 @@ https://www.sfml-dev.org/tutorials/2.6/audio-sounds.php#:~:text=Unlike%20sf%3A%3
 https://stackoverflow.com/questions/13488957/interpolate-from-one-color-to-another
 https://dsp.stackexchange.com/questions/13728/what-are-chunks-when-recording-a-voice-signal#:~:text=The%20chunk%20is%20like%20a,audio%20because%20of%20processing%20power.
 https://codereview.stackexchange.com/questions/250282/audio-visualizer-in-c
-## Points I believe I deserve
-I believe I deserve to be in the range of 160-190 points. Although my project does not include some features I discussed in my proposal, I believe that the time and effort put into learning the SFML library and audio processing is deserving of replacement for those features. Along with this I realize that the lifetime of my project was not up to the standard so I believe a point deduction there would be fair. However, I did have multiple other repositories to test the different functionalities of SFML and to figure out audio processing. 
