@@ -1,130 +1,127 @@
 #include "Home.h"
-// Initializes the Home screen object that sets the window color, sets the screen to the song selection screen,
-// and initializes the Line and Circle amplitude objects
+
 Home::Home(RenderWindow& window) :
-window(window), windowColor(255, 250, 241), screen(SONG),
-lineAmplitude(window, windowColor, selectedSongPath),
-circleAmplitude(window, windowColor, selectedSongPath) {
+    window(window), windowColor(255, 250, 241), screen(SONG),
+    lineAmplitude(window, windowColor, selectedSongPath),
+    circleAmplitude(window, windowColor, selectedSongPath)
+{
     width = window.getSize().x;
     height = window.getSize().y;
 }
 
+// Helper: draws a string centered on screen
+void Home::drawCenteredText(const string& message, Font& font, unsigned int size, Color color) {
+    // SFML 3: Text constructor takes font reference directly
+    Text text(font, message, size);
+    text.setFillColor(color);
+    FloatRect bounds = text.getLocalBounds();
+    text.setOrigin(Vector2f(bounds.position.x + bounds.size.x / 2.f,
+                            bounds.position.y + bounds.size.y / 2.f));
+    text.setPosition(Vector2f(width / 2.f, height / 2.f));
+    window.draw(text);
+}
+
 void Home::run() {
     Font font;
-    // Loads fonts from songs directory
-    if (!font.loadFromFile("songs/fonts/Arial.ttf")) {
+    // SFML 3: loadFromFile -> openFromFile
+    if (!font.openFromFile("songs/fonts/Arial.ttf")) {
         cerr << "Font could not be loaded" << endl;
         return;
     }
-    Text message("", font);
+
     while (window.isOpen()) {
-        Amplitude amplitude;
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
+        // SFML 3: pollEvent returns optional, events checked with .is<>()
+        while (auto event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
-            else if (event.type == Event::KeyPressed) {
-                // Handle key presses based on the current screen
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                 if (screen == SONG) {
-                    // Handle song selection
-                    if (event.key.code == Keyboard::Num1) {
+                    if (keyPressed->code == Keyboard::Key::Num1) {
                         selectedSongPath = "songs/fredagain.wav";
+                        songName = "Song: We've Lost Dancing\nArtist: Fred Again...";
                         screen = START;
-                        songName = "Song: We've Lost Dancing\n Artist: Fred Again...";
                     }
-                    else if (event.key.code == Keyboard::Num2) {
+                    else if (keyPressed->code == Keyboard::Key::Num2) {
                         selectedSongPath = "songs/talk-tonight.wav";
-                        screen = START;
                         songName = "Song: Talk Tonight\nArtist: Jersey";
+                        screen = START;
                     }
                 }
                 else if (screen == START) {
-                    // Handle key presses for selecting visualizations
-                    if (event.key.code == Keyboard::L) {
+                    if (keyPressed->code == Keyboard::Key::L) {
                         screen = LINE;
                     }
-                    else if (event.key.code == Keyboard::C) {
+                    else if (keyPressed->code == Keyboard::Key::C) {
                         screen = CIRCLE;
-                    }
-                }
-                else {
-                    if (amplitude.getSongStatus()) {
-                        screen = OVER;
                     }
                 }
             }
         }
-        window.clear();
-        // Draw different visualizations based on the current screen
+
+        window.clear(windowColor);
+
         switch (screen) {
             case SONG:
-                renderSongSelection();
+                renderSongSelection(font);
                 break;
             case START:
-                renderStart();
+                renderStart(font);
                 break;
             case LINE:
                 lineAmplitude.run(selectedSongPath);
+                screen = OVER;
                 break;
             case CIRCLE:
                 circleAmplitude.run(selectedSongPath);
+                screen = OVER;
                 break;
             case OVER:
-                renderOver();
+                renderOver(font);
                 break;
         }
+
         window.display();
     }
 }
 
-
-void Home::renderStart() {
+void Home::renderStart(Font& font) {
     window.clear(windowColor);
-    string message = "Welcome to my Audio Visualizer\nPress [L] for Line Waveform Visualization"
-                     "\nPress [C] for a 'Dancing Circle' Visualization\n" + songName;
-    Font font;
-    if (!font.loadFromFile("songs/fonts/Arial.ttf")) {
-        cerr << "Failed to load font" << endl;
-        return;
-    }
-    Text text(message, font);
-    text.setCharacterSize(24);
-    float xPos = (window.getSize().x - text.getGlobalBounds().width) / 2;
-    float yPos = (window.getSize().y - text.getGlobalBounds().height) / 2;
-    text.setPosition(xPos, yPos);
-    text.setFillColor(Color::Black);
-    window.draw(text);
+    string message = "Welcome to my Audio Visualizer\n\n"
+                     "Press [L] for Line Waveform\n"
+                     "Press [C] for Dancing Circle\n\n"
+                     + songName;
+    drawCenteredText(message, font, 24, Color::Black);
 }
 
-void Home::renderOver() {
-    string message = "Song Finished! If you would like to run it again \n"
-                     "press [C] for circle visuals, or press [L] for line waveform!";
-    Font font;
-    if (!font.loadFromFile("songs/fonts/Arial.ttf")) {
-        cerr << "Failed to load font" << endl;
-        return;
+void Home::renderOver(Font& font) {
+    window.clear(windowColor);
+    string message = "Song Finished!\n\n"
+                     "Press [C] for circle visuals\n"
+                     "Press [L] for line waveform";
+    drawCenteredText(message, font, 24, Color::Black);
+
+    // Allow restarting from the OVER screen
+    while (auto event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            window.close();
+        }
+        else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == Keyboard::Key::L) {
+                screen = LINE;
+            }
+            else if (keyPressed->code == Keyboard::Key::C) {
+                screen = CIRCLE;
+            }
+        }
     }
-    Text text(message, font);
-    text.setCharacterSize(24);
-    text.setFillColor(Color::Black);
-    text.setPosition((width - text.getGlobalBounds().width) / 2, (height - text.getGlobalBounds().height) / 2);
-    window.draw(text);
 }
 
-void Home::renderSongSelection() {
+void Home::renderSongSelection(Font& font) {
     window.clear(windowColor);
-    string message = "Select a song:\n[1] We've Lost Dancing\n[2] Talk Tonight";
-    Font font;
-    if (!font.loadFromFile("songs/fonts/Arial.ttf")) {
-        cerr << "Failed to load font" << endl;
-        return;
-    }
-    Text text(message, font);
-    text.setCharacterSize(24);
-    text.setFillColor(Color::Black);
-    float xPos = (window.getSize().x - text.getGlobalBounds().width) / 2;
-    float yPos = (window.getSize().y - text.getGlobalBounds().height) / 2;
-    text.setPosition(xPos, yPos);
-    window.draw(text);
+    string message = "Audio Visualizer\n\n"
+                     "Select a song:\n"
+                     "[1]  We've Lost Dancing  —  Fred Again...\n"
+                     "[2]  Talk Tonight  —  Jersey";
+    drawCenteredText(message, font, 24, Color::Black);
 }

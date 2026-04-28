@@ -1,12 +1,15 @@
 #include "LineAmplitude.h"
-// Initializes the LineAmplitude object given the provided window, window color, and audio file
+
 LineAmplitude::LineAmplitude(RenderWindow& window, Color windowColor, string& audioFile) :
-        window(window),
-        windowColor(255, 250, 241),
-        smoothingFactor(10.0f) {
+    window(window),
+    windowColor(255, 250, 241),
+    smoothingFactor(0.2f)
+{
     amplitude.loadSong(audioFile);
-    // Initialize amplitude waveform as a VertexArray of type LineStrip
-    amplitudeWaveform = VertexArray(LineStrip, amplitude.getChunkSize());
+    // SFML 3: PrimitiveType is now a scoped enum
+    amplitudeWaveform = VertexArray(PrimitiveType::LineStrip, amplitude.getChunkSize());
+    smoothedData = vector<float>(amplitude.getChunkSize(), 0.0f);
+
     for (size_t i = 0; i < amplitudeWaveform.getVertexCount(); i++) {
         amplitudeWaveform[i].color = Color::Black;
     }
@@ -15,10 +18,11 @@ LineAmplitude::LineAmplitude(RenderWindow& window, Color windowColor, string& au
 void LineAmplitude::run(const string& audioFile) {
     amplitude.loadSong(audioFile);
     amplitude.playSound();
+
     while (window.isOpen()) {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
+        // SFML 3: new event system
+        while (auto event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
         }
@@ -30,19 +34,30 @@ void LineAmplitude::run(const string& audioFile) {
 void LineAmplitude::update() {
     amplitude.update();
     const vector<float>& amplitudeData = amplitude.getAmplitudeData();
-    // Determines the visuals width and is used to calculate the x position of each vertex
+
     float scale = float(window.getSize().x) / amplitude.getChunkSize();
-    // Color variables used in gradient transition of waveform
-    Color blue(0, 0, 255);
-    Color red(255, 0, 0);
-    // Sets the color and position of each vertex in the amplitude waveform vertex array
+
+    Color blue(60, 80, 220);
+    Color red(220, 60, 80);
+
     for (size_t i = 0; i < amplitudeWaveform.getVertexCount(); i++) {
+        // Smooth each sample toward the new value to reduce jitter
+        smoothedData[i] += (amplitudeData[i] - smoothedData[i]) * smoothingFactor;
+
         float xPos = i * scale;
         float ratio = xPos / window.getSize().x;
-        Color transitionColor = Color(blue.r + ratio * (red.r - blue.r),blue.g + ratio * (red.g - blue.g),blue.b + ratio * (red.b - blue.b));
+
+        // Gradient color transition blue -> red across the waveform
+        Color transitionColor = Color(
+            static_cast<uint8_t>(blue.r + ratio * (red.r - blue.r)),
+            static_cast<uint8_t>(blue.g + ratio * (red.g - blue.g)),
+            static_cast<uint8_t>(blue.b + ratio * (red.b - blue.b))
+        );
         amplitudeWaveform[i].color = transitionColor;
-        float amplitudeVisual = amplitudeData[i] / 32768.f * window.getSize().y / 2;
-        amplitudeWaveform[i].position = Vector2f(xPos, window.getSize().y / 2 - amplitudeVisual);
+
+        // Scale amplitude to window height, centered vertically
+        float amplitudeVisual = smoothedData[i] / 32768.f * window.getSize().y / 2.f;
+        amplitudeWaveform[i].position = Vector2f(xPos, window.getSize().y / 2.f - amplitudeVisual);
     }
 }
 

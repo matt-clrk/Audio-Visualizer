@@ -1,13 +1,12 @@
 #ifndef HOME_H
 #define HOME_H
+
 #include "CircleAmplitude.h"
 #include "LineAmplitude.h"
 #include <iostream>
 
-
 class Home {
 public:
-    // Enumerated type of screens
     enum Screen {
         SONG,
         START,
@@ -15,36 +14,27 @@ public:
         LINE,
         OVER
     };
-    // Constructor that passes reference to SFML window
+
     Home(RenderWindow& window);
     void run();
 
 private:
-    // Reference to SFML window
     RenderWindow& window;
-    // Window width and height
     int width, height;
-    // Screen type
     Screen screen;
-    // Window color
     Color windowColor;
-    // Line amplitude object
     LineAmplitude lineAmplitude;
-    // Circle amplitude object
     CircleAmplitude circleAmplitude;
-    // Rendering for each screen
-    void renderStart();
-    void renderOver();
-    void renderSongSelection();
-    // Bool value to check if song is playing
     bool isPlaying;
-    // Bool value to check if visuals are playing on screen
     bool visualsOnScreen;
-    // Audio file path
     string selectedSongPath;
-    // Song details (Song name and Artist name)
     string songName;
-};
 
+    void renderStart(Font& font);
+    void renderOver(Font& font);
+    void renderSongSelection(Font& font);
+    // Helper to draw centered text
+    void drawCenteredText(const string& message, Font& font, unsigned int size, Color color);
+};
 
 #endif //HOME_H

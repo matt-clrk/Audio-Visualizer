@@ -1,32 +1,34 @@
 #include "CircleAmplitude.h"
-// Constructor initializes the CircleAmplitude object given the following
+
 CircleAmplitude::CircleAmplitude(RenderWindow& window, Color windowColor, string& audioFile) :
-        window(window)
+    window(window)
 {
-    // sets the window color
     this->windowColor = Color(255, 250, 241);
-    // Sets the circles radius
     this->dancingCircleRadius = 100.f;
-    // Set the minimum radius the circle can be
-    this->minRadius = 50.0f;
-    // Sets the maximum radius the circle can be
-    this->maxRadius = 200.0f;
+    this->minRadius = 60.0f;
+    this->maxRadius = 220.0f;
+    this->smoothedRadius = minRadius;
+
     dancingCircle.setRadius(dancingCircleRadius);
-    dancingCircle.setFillColor(Color::Black);
-    dancingCircle.setOutlineColor(Color::Black);
-    dancingCircle.setOutlineThickness(2.0f);
-    dancingCircle.setOrigin(dancingCircleRadius, dancingCircleRadius);
-    dancingCircle.setPosition(window.getSize().x / 2, window.getSize().y / 2);
+    dancingCircle.setFillColor(Color(30, 30, 30));
+    dancingCircle.setOutlineColor(Color(80, 80, 80));
+    dancingCircle.setOutlineThickness(2.5f);
+    // SFML 3: setOrigin and setPosition take Vector2f
+    dancingCircle.setOrigin(Vector2f(dancingCircleRadius, dancingCircleRadius));
+    dancingCircle.setPosition(Vector2f(window.getSize().x / 2.f, window.getSize().y / 2.f));
+
     amplitude.loadSong(audioFile);
 }
 
 void CircleAmplitude::run(const string& audioFile) {
     amplitude.loadSong(audioFile);
     amplitude.playSound();
+
     while (window.isOpen()) {
-        Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
+        // SFML 3: new event system using pollEvent() returning optional
+        while (auto event = window.pollEvent()) {
+            // SFML 3: events are now types, checked with .is<>()
+            if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
         }
@@ -38,20 +40,32 @@ void CircleAmplitude::run(const string& audioFile) {
 void CircleAmplitude::update() {
     amplitude.update();
     const vector<float>& amplitudeData = amplitude.getAmplitudeData();
-    // Used to calculate the average amplitude
+
     float sumAmplitude = 0.0f;
     for (float value : amplitudeData) {
         sumAmplitude += value;
     }
     float averageAmplitude = sumAmplitude / amplitudeData.size();
-    // Determines how much of an influence the amplitude has on scaling the circle
-    float scaleCircle = .005f;
-    // Radius of circle is scaled based off how sensitive you want it to be (lower value = less responsive, higher value = more responsive)
-    float radius = minRadius + scaleCircle * averageAmplitude;
-    radius = max(minRadius, min(radius, maxRadius));
-    dancingCircle.setRadius(radius);
-    dancingCircle.setOrigin(radius, radius);
-    dancingCircle.setPosition(window.getSize().x / 2, window.getSize().y / 2);
+
+    float scaleCircle = 0.006f;
+    float targetRadius = minRadius + scaleCircle * averageAmplitude;
+    targetRadius = max(minRadius, min(targetRadius, maxRadius));
+
+    // Smooth the radius change to avoid jitter
+    float smoothing = 0.15f;
+    smoothedRadius += (targetRadius - smoothedRadius) * smoothing;
+
+    dancingCircle.setRadius(smoothedRadius);
+    dancingCircle.setOrigin(Vector2f(smoothedRadius, smoothedRadius));
+    dancingCircle.setPosition(Vector2f(window.getSize().x / 2.f, window.getSize().y / 2.f));
+
+    // Tint the circle color based on size for a reactive feel
+    float intensity = (smoothedRadius - minRadius) / (maxRadius - minRadius);
+    uint8_t r = static_cast<uint8_t>(30 + intensity * 180);
+    uint8_t g = static_cast<uint8_t>(30 + (1.f - intensity) * 100);
+    uint8_t b = static_cast<uint8_t>(120 + (1.f - intensity) * 100);
+    dancingCircle.setFillColor(Color(r, g, b));
+    dancingCircle.setOutlineColor(Color(r + 40, g + 40, b + 40));
 }
 
 void CircleAmplitude::render() {
